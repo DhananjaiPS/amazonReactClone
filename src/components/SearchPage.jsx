@@ -184,6 +184,7 @@ function addToCart(product) {
                       src={img}
                       alt={product.title}
                       className="w-full h-40 object-contain mb-2"
+                      onClick={ ()=>{}}
                     />
                   )}
                   <h3 className="font-medium text-sm mb-1 truncate">
@@ -212,6 +213,9 @@ function addToCart(product) {
                 </div>
               );
             })}
+            {selectedProduct && (
+              <Modal selectedProduct={selectedProduct} closeModal={closeModal} addToCart={addToCart} />
+            )}
         </div>
       </div>
     </div>
