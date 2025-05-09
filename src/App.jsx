@@ -4,6 +4,9 @@ import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
 import SearchPage from './components/SearchPage';
 import Login from './components/Login';
+// import CheckoutPage from './pages/CheckoutPage';
+import CheckoutPage from './components/CheckoutPage';
+// import CarouselCard from './components/CarouselCard';
 function App() {
  
   const [cart, setCart] = useState(() => {
@@ -40,6 +43,7 @@ function App() {
           element={<SearchPage />}
         />
         <Route path='/login' element={<Login/>} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
       

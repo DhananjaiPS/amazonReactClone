@@ -1,148 +1,218 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-
+import Modal from './Modal';
+import ProductCard from './ProductCard';
 
 function SearchPage() {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get('q');
+  const navigate = useNavigate();
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const handleProductClick = (product) => setSelectedProduct(product);
+  const closeModal = () => setSelectedProduct(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
   const [Productdata, setProductData] = useState([]);
+  const [filteredProductData, setFilteredProductData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // filter states
+  const [min, setMin] = useState(0);
+  const [max, setMax] = useState(10000);
+  const [brands, setBrands] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [sellers, setSellers] = useState([]);
+  const [rating, setRating] = useState(null);
+
+  // recommendations
+  const recommendations = ['Apple AirPods', 'Apple Watch', 'Apple iPad', 'Apple MacBook Pro'];
+
+  // fetch products
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const res = await fetch(`https://dummyjson.com/products/search?q=${query}&limit=20`);
+        const res = await fetch(`https://dummyjson.com/products/search?q=${query}&limit=100`);
         const data = await res.json();
         setProductData(data.products);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error(err);
       }
+      setLoading(false);
     }
-    if (query) fetchData();
+    fetchData();
   }, [query]);
+
+
+
+
+  const [LocalCart,setCart]=useState([]);
+
+function addToCart(product) {
+  let existingCart = JSON.parse(localStorage.getItem('cart'));
+  const updatedCart = [...existingCart, product];
+  localStorage.setItem('cart', JSON.stringify(updatedCart));
+  setCart(updatedCart);
+}
+
+
+
+  // apply filters
+  useEffect(() => {
+    let data = Productdata.filter(p => p.price >= min && p.price <= max);
+    if (brands.length) data = data.filter(p => brands.includes(p.brand));
+    if (departments.length) data = data.filter(p => departments.includes(p.category));
+    if (deals.includes('today')) data = data.filter(p => p.discountPercentage >= 10);
+    if (sellers.length) data = data.filter(p => sellers.includes(p.title));
+    if (rating) data = data.filter(p => Math.floor(p.rating) >= rating);
+    setFilteredProductData(data);
+  }, [Productdata, min, max, brands, departments, deals, sellers, rating]);
+
+  // handle recommendation click
+  const handleRecomClick = (text) => {
+    setSearchParams({ q: text });
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
       <div className="container mx-auto px-4 py-6 flex gap-6">
-        {/* Sidebar */}
         <aside className="w-64 bg-white p-4 space-y-6 text-sm text-gray-700">
-          {/* Explore Related Products */}
-          <div>
-            <h3 className="font-bold mb-2">Explore Related Products</h3>
-            <ul className="space-y-1">
-              {['Apple AirPods','Apple Watch','Apple iPad','Apple MacBook Pro'].map(item => (
-                <li key={item} className="hover:underline cursor-pointer">{item}</li>
-              ))}
-            </ul>
-            <button className="mt-2 text-blue-600 hover:underline">See more</button>
-          </div>
+          {/* show recommendations only when no query */}
+          {!query && (
+            <div>
+              <h3 className="font-bold mb-2">Explore Related Products</h3>
+              <ul className="space-y-1">
+                {recommendations.map(item => (
+                  <li key={item}
+                    className="hover:underline cursor-pointer"
+                    onClick={() => handleRecomClick(item)}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-          {/* Brands */}
           <div>
             <h3 className="font-bold mb-2">Brands</h3>
             <ul className="space-y-1 max-h-32 overflow-y-auto">
-              {['Apple','365 by Whole Foods Market','GoGo SqueeZ','Amazon Fresh','Quaker','Mott\'s','Bragg'].map(brand => (
-                <li key={brand} className="flex items-center">
-                  <input type="checkbox" className="mr-2" />{brand}
+              {['Apple', '365 by Whole Foods Market', 'GoGo SqueeZ', 'Amazon Fresh', 'Quaker', 'Mott\'s', 'Bragg'].map(b => (
+                <li key={b} className="flex items-center">
+                  <input type="checkbox" className="mr-2" value={b}
+                    onChange={e => {
+                      const v = e.target.value;
+                      setBrands(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
+                    }} />{b}
                 </li>
               ))}
             </ul>
-            <button className="mt-2 text-blue-600 hover:underline">See more</button>
           </div>
 
-          {/* Department */}
           <div>
             <h3 className="font-bold mb-2">Department</h3>
             <ul className="space-y-1">
-              {['Electronics','Earbud & In-Ear Headphones','Over-Ear Headphones','Computer Tablets','Fresh Apples','Fresh Honeycrisp Apples','Men\'s Smartwatches','Cell Phone Accessories'].map(dep => (
-                <li key={dep} className="flex items-center">
-                  <input type="checkbox" className="mr-2" />{dep}
+              {['electronics', 'smartphones', 'laptops', 'fragrances'].map(c => (
+                <li key={c} className="flex items-center">
+                  <input type="checkbox" className="mr-2" value={c}
+                    onChange={e => {
+                      const v = e.target.value;
+                      setDepartments(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
+                    }} />{c}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Price */}
           <div>
             <h3 className="font-bold mb-2">Price</h3>
             <div className="flex items-center space-x-2">
-              <input type="number" placeholder="$1" className="w-20 p-1 border" />
+              <input type="number" className="w-20 p-1 border" value={min}
+                min="0" onChange={e => setMin(Number(e.target.value))} />
               <span>–</span>
-              <input type="number" placeholder="$330+" className="w-20 p-1 border" />
+              <input type="number" className="w-20 p-1 border" value={max}
+                min="0" onChange={e => setMax(Number(e.target.value))} />
             </div>
-            <button className="mt-2 px-3 py-1 bg-yellow-400 hover:bg-yellow-500 rounded">Go</button>
           </div>
 
-          {/* Deals & Discounts */}
           <div>
             <h3 className="font-bold mb-2">Deals & Discounts</h3>
-            <ul className="space-y-1">
-              {['All Discounts','Today\'s Deals'].map(deal => (
-                <li key={deal} className="flex items-center">
-                  <input type="checkbox" className="mr-2" />{deal}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Seller */}
-          <div>
-            <h3 className="font-bold mb-2">Seller</h3>
-            <ul className="space-y-1 max-h-20 overflow-y-auto">
-              {['ZooScape','Amazon.com'].map(seller => (
-                <li key={seller} className="flex items-center">
-                  <input type="checkbox" className="mr-2" />{seller}
-                </li>
-              ))}
-            </ul>
-            <button className="mt-2 text-blue-600 hover:underline">See more</button>
-          </div>
-
-          {/* Customer Reviews */}
-          <div>
-            <h3 className="font-bold mb-2">Customer Reviews</h3>
             <label className="flex items-center">
-              <input type="radio" name="rating" className="mr-2" />4 Stars & Up
+              <input type="checkbox" value="today"
+                onChange={e => setDeals(prev => e.target.checked ? [...prev, 'today'] : prev.filter(x => x !== 'today'))}
+                className="mr-2" />Today's Deals
             </label>
           </div>
 
-          {/* More facets can be added similarly... */}
+          <div>
+            <h3 className="font-bold mb-2">Seller</h3>
+            <ul className="space-y-1">
+              {['ZooScape', 'Amazon.com'].map(s => (
+                <li key={s} className="flex items-center">
+                  <input type="checkbox" className="mr-2" value={s}
+                    onChange={e => setSellers(prev => e.target.checked ? [...prev, s] : prev.filter(x => x !== s))}
+                  />{s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-bold mb-2">Customer Reviews</h3>
+            {[4, 3, 2, 1].map(r => (
+              <label key={r} className="flex items-center">
+                <input type="radio" name="rating" className="mr-2" value={r}
+                  onChange={() => setRating(r)} />{r} Stars & Up
+              </label>
+            ))}
+          </div>
         </aside>
 
-        {/* Product Listing */}
-        <main className="flex-1">
-          <h2 className="text-xl font-semibold mb-2">Search Results</h2>
-          {query ? (
-            <p className="mb-4">Showing results for: <strong>{query}</strong></p>
-          ) : (
-            <p>No search query provided.</p>
-          )}
-
-          {loading && (
-            <div className="flex justify-center items-center h-64">
-              <img src="/animation.gif" alt="Loading..." className="w-60 h-30" />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {!loading && Productdata.map((product, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {!loading &&
+            filteredProductData.map((product, index) => {
               const img = product.images?.[0];
               return (
-                <div key={index} className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-                  {img && <img src={img} alt={product.title} className="w-full h-40 object-contain mb-2" />}
-                  <h3 className="font-medium text-sm mb-1 truncate">{product.title}</h3>
-                  <p className="text-base font-semibold text-gray-900">₹{product.price}</p>
-                  <button className="mt-2 w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm" >Add to Cart</button>
+                <div
+                  key={index}
+                  className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                  onClick={() => handleProductClick(product)}    // sending the product to the modal and avoid realling the fetch api if use id
+                >
+                  {img && (
+                    <img
+                      src={img}
+                      alt={product.title}
+                      className="w-full h-40 object-contain mb-2"
+                    />
+                  )}
+                  <h3 className="font-medium text-sm mb-1 truncate">
+                    {product.title}
+                  </h3>
+                  <div className="text-orange-500 text-xl mb-1">
+                    {"★".repeat(Math.floor(product.rating || 0))}
+                    {"☆".repeat(5 - Math.floor(product.rating || 0))}
+                  </div>
+                  <p className="text-base font-semibold text-gray-900">
+                    $ {product.price}
+                  </p>
+                  <button
+                    className="mt-2 w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
+                    onClick={() => addToCart(product)}
+                  >
+                    Add to Cart
+                  </button>
+
+                  <button
+                    className="mt-2 w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm"
+                    onClick={() => buynow(product)}
+                  >
+                    Buy Now
+                  </button>
                 </div>
-              )
+              );
             })}
-          </div>
-        </main>
+        </div>
       </div>
     </div>
   );

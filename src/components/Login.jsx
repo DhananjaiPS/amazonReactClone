@@ -8,20 +8,56 @@ const Login = () => {
     password: "",
     username: "",
   });
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted:", formData);
-    navigate("/");
-  };
 
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    if (toggleLogin) {
+      // LOGIN
+      const user = users.find(
+        (u) => u.email === formData.email && u.password === formData.password
+      );
+
+      if (user) {
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        setError("");
+        navigate("/");
+      } else {
+        setError("Invalid email or password.");
+      }
+    } else {
+      // REGISTER
+      const userExists = users.find((u) => u.email === formData.email);
+
+      if (userExists) {
+        setError("User already exists with this email.");
+        return;
+      }
+
+      const newUser = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("currentUser", JSON.stringify(newUser));
+      setError("");
+      navigate("/");
+    }
   };
 
   return (
@@ -36,6 +72,10 @@ const Login = () => {
         <h1 className="text-2xl font-medium mb-4">
           {toggleLogin ? "Sign-In" : "Create Account"}
         </h1>
+
+        {error && (
+          <p className="text-sm text-red-600 font-medium mb-2">{error}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {!toggleLogin && (
@@ -53,7 +93,9 @@ const Login = () => {
           )}
 
           <div>
-            <label className="text-sm font-semibold">Email or mobile phone number</label>
+            <label className="text-sm font-semibold">
+              Email or mobile phone number
+            </label>
             <input
               type="email"
               name="email"
@@ -112,7 +154,10 @@ const Login = () => {
             <hr className="flex-grow border-t border-gray-300" />
           </div>
           <button
-            onClick={() => setToggleLogin(false)}
+            onClick={() => {
+              setToggleLogin(false);
+              setError("");
+            }}
             className="mt-4 bg-white border border-gray-400 text-sm w-full py-2 rounded-md hover:bg-gray-100"
           >
             Create your Amazon account
@@ -121,7 +166,10 @@ const Login = () => {
       ) : (
         <div className="w-full max-w-md mt-4 text-sm text-blue-700 text-center">
           <span
-            onClick={() => setToggleLogin(true)}
+            onClick={() => {
+              setToggleLogin(true);
+              setError("");
+            }}
             className="cursor-pointer hover:underline"
           >
             Already have an account? Sign-In

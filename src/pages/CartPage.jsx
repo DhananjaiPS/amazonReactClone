@@ -1,79 +1,112 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-const CartPage = ({ cart, setCart }) => {
-  if (cart.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <p className="text-lg">Your Cart is empty.</p>
-      </div>
-    );
+function CartPage() {
+  const [cart, setCart] = useState([]);
+  const [buynow, setBuynow] = useState([]);
+  const navigate = useNavigate(); // Use the navigate function
+
+  useEffect(() => {
+    const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCart(existingCart);
+
+    const buyNowItems = JSON.parse(localStorage.getItem('buynow')) || [];
+    setBuynow(buyNowItems);
+  }, []);
+
+  function remove(product) {
+    const updatedCart = cart.filter((item) => item.id !== product.id);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    setCart(updatedCart);
   }
 
-  const handleRemove = (index) => {
-    const newCart = [...cart];
-    newCart.splice(index, 1);
-    setCart(newCart);
-  };
+  function handleBuyNow(product) {
+    const updatedBuyNow = [...buynow, product];
+    localStorage.setItem('buynow', JSON.stringify(updatedBuyNow));
+    setBuynow(updatedBuyNow);
+  }
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
-      <div className="container mx-auto flex flex-col lg:flex-row gap-6 px-4">
-        {/* Cart Items Section */}
-        <section className="flex-1 bg-white p-6 rounded-lg shadow">
-          <h1 className="text-2xl font-bold mb-6">Shopping Cart</h1>
-          {cart.map((item, index) => (
-            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b pb-4 mb-4">
-              <img src={item.image} alt={item.title} className="w-24 h-24 object-contain" />
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold hover:underline cursor-pointer truncate max-w-xs">{item.title}</h2>
-                <p className="text-sm text-gray-600">Seller: Amazon.com</p>
-                <div className="mt-2 flex items-center space-x-2">
-                  <label htmlFor={`qty-${index}`} className="text-sm">Qty:</label>
-                  <select
-                    id={`qty-${index}`} 
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const newCart = [...cart];
-                      newCart[index].quantity = parseInt(e.target.value);
-                      setCart(newCart);
-                    }}
-                    className="border p-1 text-sm"
-                  >
-                    {[...Array(10).keys()].map((n) => (
-                      <option key={n+1} value={n+1}>{n+1}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold">₹{(item.price * item.quantity).toFixed(2)}</p>
-                <button
-                  onClick={() => handleRemove(index)}
-                  className="mt-2 text-blue-600 hover:underline text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* Order Summary Section */}
-        <aside className="w-full lg:w-96 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-          <div className="flex justify-between mb-2">
-            <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-            <span className="font-bold">₹{total.toFixed(2)}</span>
-          </div>
-          <button className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 rounded-lg">
-            Proceed to Buy
+    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {cart.length === 0 ? (
+        <div className="text-center mt-20">
+          <h2 className="text-2xl font-semibold mb-4">Your Cart is empty</h2>
+          <button
+            className="bg-yellow-400 hover:bg-yellow-300 px-6 py-2 rounded font-medium"
+            onClick={() => navigate('/')} // Use navigate to go to the home page
+          >
+            Continue Shopping
           </button>
-        </aside>
-      </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Products Section */}
+          <div className="lg:col-span-2 space-y-4">
+            {cart.map((product, index) => {
+              const img = product.images?.[0];
+              return (
+                <div
+                  key={index}
+                  className="flex items-start gap-4 p-4 border rounded bg-white shadow-sm"
+                >
+                  {img && (
+                    <img
+                      src={img}
+                      alt={product.title}
+                      className="w-28 h-28 object-contain"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-md">{product.title}</h3>
+                    <div className="text-yellow-500 text-sm mb-1">
+                      {'★'.repeat(Math.floor(product.rating || 0))}
+                      {'☆'.repeat(5 - Math.floor(product.rating || 0))}
+                    </div>
+                    <p className="text-lg font-bold text-gray-800 mb-2">
+                      ₹ {product.price.toLocaleString()}
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleBuyNow(product)}
+                        className="bg-yellow-400 hover:bg-yellow-300 text-sm px-3 py-1 rounded"
+                      >
+                        Buy Now
+                      </button>
+                      <button
+                        onClick={() => remove(product)}
+                        className="bg-red-400 hover:bg-red-500 text-sm px-3 py-1 rounded text-white"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Cart Summary */}
+          <div className="sticky top-20 self-start bg-white p-4 rounded shadow-md">
+            <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
+            <p className="mb-2">Items: <strong>{cart.length}</strong></p>
+            <p className="mb-4">Total: <strong>₹ {totalPrice.toLocaleString()}</strong></p>
+            <button
+              className="bg-yellow-400 hover:bg-yellow-300 w-full py-2 rounded font-medium"
+               onClick={() =>
+                navigate('/checkout', {
+                  state: { cart, totalPrice }, // Pass cart and price to CheckoutPage
+                })
+              } // Use navigate to go to the checkout page
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default CartPage;
