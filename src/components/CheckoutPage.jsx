@@ -1,13 +1,12 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 function CheckoutPage() {
     const location = useLocation();
-    const { cart, totalPrice } = location.state || {}; // Destructure cart and totalPrice
-
+    const { cart, totalPrice } = location.state || {}; 
     const [paymentProcessing, setPaymentProcessing] = useState(false);
     const [seconds, setSeconds] = useState(5);
     const navigate = useNavigate();
@@ -16,6 +15,12 @@ function CheckoutPage() {
         setPaymentProcessing(true);
     };
 
+    function RemoveAll() {
+        localStorage.removeItem('cart');
+        localStorage.removeItem('buynow');
+        setPaymentProcessing(false); 
+    }
+
     useEffect(() => {
         let timer;
         if (paymentProcessing) {
@@ -23,6 +28,7 @@ function CheckoutPage() {
                 setSeconds((prev) => {
                     if (prev <= 1) {
                         clearInterval(timer);
+                        RemoveAll(); 
                         navigate('/');
                         return 0;
                     }
@@ -31,7 +37,7 @@ function CheckoutPage() {
             }, 1000);
         }
 
-        return () => clearInterval(timer);
+        return () => clearInterval(timer); 
     }, [paymentProcessing, navigate]);
 
     return (
@@ -48,7 +54,7 @@ function CheckoutPage() {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-md">{product.title}</h3>
                                 <p className="text-lg font-bold text-gray-800 mb-2">
-                                    ₹ {product.price.toLocaleString()}
+                                  $ {product.price.toLocaleString()}
                                 </p>
                             </div>
                         </div>
@@ -58,19 +64,19 @@ function CheckoutPage() {
                 )}
             </div>
 
-            {/* Right side (Order summary and payment button) */}
+            
             <div className="w-[300px] ml-8 space-y-4">
-                {/* Cart Summary */}
+        
                 <div className="bg-white p-4 rounded shadow-md">
                     <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
                     <p className="mb-2">Items: <strong>{cart.length}</strong></p>
                     <p className="text-xl font-bold">Total: ₹ {totalPrice.toLocaleString()}</p>
                 </div>
 
-                {/* Payment Button */}
+     
                 {!paymentProcessing ? (
                     <button
-                        className="bg-green-500 hover:bg-green-600 w-full py-2 rounded font-medium text-white mt-6"
+                        className="bg-red-500 hover:bg-green-600 w-full py-2 rounded font-medium text-white mt-6"
                         onClick={handlePayment}
                     >
                         Complete Payment

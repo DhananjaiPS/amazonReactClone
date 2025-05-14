@@ -4,26 +4,32 @@ import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
+import  {addToCart } from "../../slices/cartSlice"
+
+import { useDispatch } from "react-redux";
 
 const HomePage = ({ cart, setCart }) => {
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [Productdata, setProductData] = useState([]);
   const [loading, setLoading] = useState(false);
-function addToCart(product) {
-  let existingCart = JSON.parse(localStorage.getItem('cart'));
-  const updatedCart = [...existingCart, product];
-  localStorage.setItem('cart', JSON.stringify(updatedCart));
-  setCart(updatedCart);
-}
 
-  // Fetch data on page load
+  // function addToCart(product) {
+  //   let existingCart = JSON.parse(localStorage.getItem('cart')) || [];
+  //   const updatedCart = [...existingCart, product];
+  //   localStorage.setItem('cart', JSON.stringify(updatedCart));
+  //   setCart(updatedCart);
+  // }
+  
+  const dispatch = useDispatch();  //instance banana hoga  
+
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        const res = await fetch('https://dummyjson.com/products'); // Remove query, fetching all products
+        const res = await fetch('https://dummyjson.com/products');
         const data = await res.json();
-        setProductData(data.products); // Set products to state
+        setProductData(data.products);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -31,29 +37,25 @@ function addToCart(product) {
       }
     }
     fetchData();
-  }, []);  // No dependency, so it runs once on page load
+  }, []);
 
-  // Handle product click for modal
   const handleProductClick = (product) => {
     setSelectedProduct(product);
   };
 
-  // Close the modal
   const closeModal = () => {
     setSelectedProduct(null);
   };
 
   return (
-    <div className="bg-[#EAEDED]">
+    <div className="bg-[#EAEDED] min-h-screen">
       <Navbar cart={cart} setCart={setCart} />
       <CarouselCard />
 
-      <main className="flex-1 p-6 relative -top-40"> 
-        {/* <h2 className="text-xl font-semibold mb-2">All Products</h2> */}
-
+      <main className="flex-1 px-4 py-6 sm:px-6 relative sm:-top-40">
         {loading && (
           <div className="flex justify-center items-center h-64">
-            <img src="/animation3.gif" alt="Loading..." className="w-60 h-30" />
+            <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" />
           </div>
         )}
 
@@ -63,15 +65,15 @@ function addToCart(product) {
               const img = product.images?.[0];
               return (
                 <div
-                  key={product.id}  // Unique product ID as key
+                  key={product.id}
                   className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
-                  onClick={() => handleProductClick(product)}  // Open modal on click
+                  onClick={() => handleProductClick(product)}
                 >
                   {img && (
                     <img
                       src={img}
                       alt={product.title}
-                      className="w-full h-40 object-contain mb-2"
+                      className="w-full aspect-[3/2] object-contain mb-2"
                     />
                   )}
                   <h3 className="font-medium text-sm mb-1 truncate">{product.title}</h3>
@@ -82,18 +84,29 @@ function addToCart(product) {
                   <p className="text-base font-semibold text-gray-900">
                     ${product.price}
                   </p>
-                  <button className="mt-2 w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"  onClick={() => addToCart(product)}>
-                    Add to Cart
-                  </button>
-                  <button className="mt-2 w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm">
-                    Buy Now
-                  </button>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button
+                      className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent modal open
+                          dispatch( addToCart(product) )
+;
+                      }}
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      className="w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
                 </div>
               );
             })}
         </div>
 
-        {/* Modal for selected product */}
         <Modal selectedProduct={selectedProduct} closeModal={closeModal} />
       </main>
 

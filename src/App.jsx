@@ -4,9 +4,11 @@ import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
 import SearchPage from './components/SearchPage';
 import Login from './components/Login';
-// import CheckoutPage from './pages/CheckoutPage';
 import CheckoutPage from './components/CheckoutPage';
-// import CarouselCard from './components/CarouselCard';
+
+import { Provider } from 'react-redux';
+import store from './data/store';
+
 function App() {
  
   const [cart, setCart] = useState(() => {
@@ -51,4 +53,12 @@ function App() {
   );
 }
 
-export default App;
+
+function AppWithProvider() {
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
+  );
+}
+export default AppWithProvider

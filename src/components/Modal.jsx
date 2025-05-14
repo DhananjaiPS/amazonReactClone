@@ -41,7 +41,7 @@ function Modal({ selectedProduct, closeModal }) {
               {"☆".repeat(5 - Math.floor(selectedProduct.rating || 0))}
             </div>
             <p className="text-gray-700 mb-2">{selectedProduct.description}</p>
-            <p className="text-lg font-semibold mb-4">₹{selectedProduct.price}</p>
+            <p className="text-lg font-semibold mb-4"> $ {selectedProduct.price}</p>
             <div className="flex gap-2">
               <button
                 className={`flex-1 py-2 rounded text-sm ${
