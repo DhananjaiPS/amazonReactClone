@@ -56,71 +56,94 @@ function CartPage() {
       ) : (
         <div className="flex flex-col lg:flex-row lg:flex-wrap gap-6">
           {/* Products Section */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6 w-full">
             {cart.items.map((element, index) => {
               const img = element.product.images?.[0];
+              const rating = Math.floor(element.product.rating || 0);
+
               return (
                 <div
                   key={index}
-                  className="flex items-start gap-4 p-4 border rounded bg-white shadow-sm"
+                  className="flex flex-col lg:flex-row items-start gap-4 p-6 border rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow"
                 >
                   {img && (
                     <img
                       src={img}
                       alt={element.product.title}
-                      className="w-28 h-28 object-contain"
+                      className="w-32 h-32 object-contain border rounded-md"
                     />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-md">{element.product.title}</h3>
-                    <div className="text-yellow-500 text-sm mb-1">
-                      {'★'.repeat(Math.floor(element.product.rating || 0))}
-                      {'☆'.repeat(5 - Math.floor(element.product.rating || 0))}
+                    <h3 className="font-medium text-lg text-gray-800">{element.product.title}</h3>
+                    <div className="text-yellow-500 text-sm mb-2">
+                      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
                     </div>
-                    <p className="text-lg font-bold text-gray-800 mb-2">
+                    <p className="text-xl font-semibold text-gray-900 mb-2">
                       $ {element.product.price.toLocaleString()}
                     </p>
-                    <p>
-                      Quantity
-                      <button className="bg-black text-sx w-8 text-white" onClick={()=>{dispatch(addQuantity(element.product.id))}}>+</button>
-                      <input type="number" value={element.quantity} className="bg-gray-400 w-8" />
-                      <button className="bg-black text-sx w-8 text-white" onClick={()=>dispatch(removeQuantity(element.product.id))}>-</button>
-                    </p>
 
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm text-gray-600">Qty:</span>
+                      <button
+                        className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
+                        onClick={() => dispatch(removeQuantity(element.product.id))}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        value={element.quantity}
+                        readOnly
+                        className="w-10 text-center border rounded bg-gray-100"
+                      />
+                      <button
+                        className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
+                        onClick={() => dispatch(addQuantity(element.product.id))}
+                      >
+                        +
+                      </button>
+                    </div>
 
+                    <div className="flex gap-4 text-sm">
                       <button
                         onClick={() => remove(element.product.id)}
-                        className="bg-red-400 hover:bg-red-500 text-sm px-3 py-1 rounded text-white"
+                        className="text-blue-600 hover:underline"
                       >
-                        Remove
+                        Delete
                       </button>
+                      <button className="text-blue-600 hover:underline">Save for later</button>
+                      <button className="text-blue-600 hover:underline">See more like this</button>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
+        
+
 
           {/* Cart Summary */}
-          <div className="sticky top-20 self-start bg-white p-4 rounded shadow-md">
-            <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
-            <p className="mb-2">Items: <strong>{totalItems}</strong></p>
-            <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
-            <button
-              className="bg-yellow-400 hover:bg-yellow-300 w-full py-2 rounded font-medium"
-              onClick={() =>
-                navigate('/checkout', {
-                  state: { items: cart.items, totalPrice }, // Pass cart and price to CheckoutPage
-                })
-              } // Use navigate to go to the checkout page
-            >
-              Proceed to Checkout
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[50vh]">
+        <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
+        <p className="mb-2">Items: <strong>{totalItems}</strong></p>
+        <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
+        <button
+          className="bg-yellow-600 hover:bg-orange-600 w-full py-2 rounded font-medium"
+          onClick={() =>
+            navigate('/checkout', {
+              
+              state: { items: cart.items, totalPrice }, // Pass cart and price to CheckoutPage
+            })
+          } // Use navigate to go to the checkout page
+        >
+          Proceed to Checkout
+          {console.log(cart.items)}
+        </button>
+      </div>
     </div>
+  )
+}
+    </div >
   );
 }
 
