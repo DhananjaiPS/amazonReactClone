@@ -62,7 +62,7 @@ function CheckoutPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-md">{cartItem.product.title}</h3>
                 <p className="text-lg font-bold text-gray-800 mb-2">
-                  ₹ {cartItem.product.price.toLocaleString()} × {cartItem.quantity}
+                  $ {cartItem.product.price.toLocaleString()} × {cartItem.quantity}
                 </p>
               </div>
             </div>
@@ -77,7 +77,7 @@ function CheckoutPage() {
         <div className="bg-white p-4 rounded shadow-md">
           <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
           <p className="mb-2">Items: <strong>{filteredItems.length}</strong></p>
-          <p className="text-xl font-bold">Total: ₹ {totalPrice.toLocaleString()}</p>
+          <p className="text-xl font-bold">Total: $ {totalPrice.toLocaleString()}</p>
         </div>
 
         {!paymentProcessing ? (

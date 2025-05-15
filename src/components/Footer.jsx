@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#232F3E] text-white">
+    <footer className="bg-[#232F3E] text-white ">
       {/* Top Section */}
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="flex justify-center mb-6">
@@ -57,7 +57,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="bg-[#131A22] py-4">
+      <div className="bg-[#131A22] py-4 h-full">
         <div className="max-w-screen-xl mx-auto px-4 text-center text-xs">
           <p>&copy; 2025 Amazon Clone. Built with ❤️ by Dhananjai</p>
         </div>

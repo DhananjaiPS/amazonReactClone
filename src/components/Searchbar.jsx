@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useCallback} from "react";
 import { useNavigate } from "react-router-dom";
 import { suggestion } from "../data/mockData";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
@@ -12,32 +12,57 @@ export default function Searchbar({ SearchTerm = "" }) {
   const navigate = useNavigate();
 
   // Simulate fetching suggestions (debounce in real app)
-  const fetchSuggestions = async (q) => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 300));
-    const results = suggestion.filter((item) =>
-      item.toLowerCase().includes(q.toLowerCase())
-    );
-    setSuggestions(results);
-    setLoading(false);
-    setOpen(true);
+  function debounce(func, delay = 300) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func(...args);
+    }, delay);
   };
+}
 
-  // Trigger search & stock check
-  const doSearch = (q) => {
-    setOpen(false);
-    navigate(`/search?q=${encodeURIComponent(q)}`);
-    const isAvail = Math.random() > 0.5; // replace w/ real API
-    setAvailable(isAvail);
-  };
+ const fetchSuggestions = async (q) => {
+  setLoading(true);
+  const results = suggestion.filter((item) =>
+    item.toLowerCase().includes(q.toLowerCase())
+  );
+  setSuggestions(results);
+  setLoading(false);
+  setOpen(true);
+};
+
+const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), []);
+
+
+  const doSearch = async (q) => {
+  setOpen(false);
+  navigate(`/search?q=${encodeURIComponent(q)}`);
+  setLoading(true);
+  try {
+    const res = await fetch(`https://dummyjson.com/products/search?q=${encodeURIComponent(q)}&limit=100`);
+    const data = await res.json();
+    const isAvailable = data.products && data.products.length > 0;
+    setAvailable(isAvailable);
+    // Optionally, you can set the fetched products to a state variable
+    // setProductData(data.products);
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    setAvailable(false);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Input change handler
-  const onInput = (e) => {
-    const v = e.target.value;
-    setValue(v);
-    if (v.trim()) fetchSuggestions(v);
-    else setOpen(false);
-  };
+ const onInput = (e) => {
+  const v = e.target.value;
+  setValue(v);
+  if (v.trim()) debouncedFetchSuggestions(v); // <-- use debounced function
+  else setOpen(false);
+};
+
 
   // Keyboard shortcuts
   const onKeyDown = (e) => {
@@ -58,7 +83,8 @@ export default function Searchbar({ SearchTerm = "" }) {
 
   // “Continue Shopping” nav
   const continueShopping = () => navigate("/");
-
+  {console.log(available,"avai")
+  console.log(open ,"open")}
   return (
     <div className="relative w-full max-w-xl mx-auto">
       <div className="flex items-center border rounded-md overflow-hidden">
@@ -115,19 +141,20 @@ export default function Searchbar({ SearchTerm = "" }) {
         </div>
       )}
 
+      
       {!available && !open && (
-        <div className="absolute mt-2  flex justify-start flex-col gap-10 text-black border border-white-400 p-3 -mdrounded top-20 w-[110vh] h-[90vh]">
-          <p className="text-white-800 text-xl">
-            This item isn’t currently available on Amazon.
-          </p>
-          <button
-            onClick={continueShopping}
-            className="mt-2 bg-orange-500 text-white py-2 px-4 rounded w-[40vh]"
-          >
-            Continue Shopping
-          </button>
-        </div>
-      )}
+  <div className="absolute mt-2 top-40">
+    <p className="text-black text-xl">
+      This item isn’t currently available on Amazon.
+    </p>
+    <button
+      onClick={continueShopping}
+      className="mt-2 bg-orange-500 text-white py-2 px-4 rounded w-[40vh]"
+    >
+      Continue Shopping
+    </button>
+  </div>
+)}
     </div>
   );
 }

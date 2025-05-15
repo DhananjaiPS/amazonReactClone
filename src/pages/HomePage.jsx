@@ -1,37 +1,26 @@
 import CarouselCard from "../components/Carousel";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import ProductCard from "../components/ProductCard";
 import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
-import  {addToCart } from "../../slices/cartSlice"
-
+import { addToCart } from "../../slices/cartSlice";
 import { useDispatch } from "react-redux";
 
 const HomePage = ({ cart, setCart }) => {
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [Productdata, setProductData] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // function addToCart(product) {
-  //   let existingCart = JSON.parse(localStorage.getItem('cart')) || [];
-  //   const updatedCart = [...existingCart, product];
-  //   localStorage.setItem('cart', JSON.stringify(updatedCart));
-  //   setCart(updatedCart);
-  // }
-  
-  const dispatch = useDispatch();  //instance banana hoga  
+  const dispatch = useDispatch();
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        const res = await fetch('https://dummyjson.com/products');
+        const res = await fetch("https://dummyjson.com/products");
         const data = await res.json();
         setProductData(data.products);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -48,18 +37,18 @@ const HomePage = ({ cart, setCart }) => {
   };
 
   return (
-    <div className="bg-[#EAEDED] min-h-screen">
+    <div className="bg-[#EAEDED] min-h-screen bg-gray-200">
       <Navbar cart={cart} setCart={setCart} />
       <CarouselCard />
 
-      <main className="flex-1 px-4 py-6 sm:px-6 relative sm:-top-40">
+      <main className="flex-1 px-2 sm:px-6 py-6 relative sm:-top-40">
         {loading && (
           <div className="flex justify-center items-center h-64">
             <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" />
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {!loading &&
             Productdata.map((product) => {
               const img = product.images?.[0];
@@ -76,7 +65,9 @@ const HomePage = ({ cart, setCart }) => {
                       className="w-full aspect-[3/2] object-contain mb-2"
                     />
                   )}
-                  <h3 className="font-medium text-sm mb-1 truncate">{product.title}</h3>
+                  <h3 className="font-medium text-sm mb-1 truncate">
+                    {product.title}
+                  </h3>
                   <div className="text-orange-500 text-xl mb-1">
                     {"★".repeat(Math.floor(product.rating || 0))}
                     {"☆".repeat(5 - Math.floor(product.rating || 0))}
@@ -89,8 +80,7 @@ const HomePage = ({ cart, setCart }) => {
                       className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent modal open
-                          dispatch( addToCart(product) )
-;
+                        dispatch(addToCart(product));
                       }}
                     >
                       Add to Cart

@@ -17,29 +17,26 @@ function CartPage() {
   const [buynow, setBuynow] = useState([]);
   const navigate = useNavigate(); // Use the navigate function
 
+  let quantity = 0;
   const totalItems = useMemo(() => {
-    let quantity = 0;
     for (let i = 0; i < cart.items.length; i++) {
-      quantity += cart.items[i].quantity;
+      quantity += cart.items[i].quantity;  // <- use qty here
     }
     return quantity;
-  }
-    , [cart]);
+  }, [cart]);
 
-  function remove(id) {
-
-    dispatch(removeItem(id))
-
-  }
-
-  function handleBuyNow(product) {
-
-  }
-
+  // Total price calc
   let totalPrice = 0;
   cart.items.forEach((item) => {
-    totalPrice += item.product.price * item.quantity; // Assuming each item has a quantity property
+    totalPrice += item.product.price * item.quantity;  // <- qty here too
   });
+
+  function remove(id) {
+    dispatch(removeItem(id))
+  }
+
+
+
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -55,7 +52,7 @@ function CartPage() {
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row lg:flex-wrap gap-6">
-          {/* Products Section */}
+  
           <div className="lg:col-span-2 space-y-6 w-full">
             {cart.items.map((element, index) => {
               const img = element.product.images?.[0];
@@ -119,30 +116,30 @@ function CartPage() {
               );
             })}
           </div>
-        
+
 
 
           {/* Cart Summary */}
-      <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[50vh]">
-        <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
-        <p className="mb-2">Items: <strong>{totalItems}</strong></p>
-        <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
-        <button
-          className="bg-yellow-600 hover:bg-orange-600 w-full py-2 rounded font-medium"
-          onClick={() =>
-            navigate('/checkout', {
-              
-              state: { items: cart.items, totalPrice }, // Pass cart and price to CheckoutPage
-            })
-          } // Use navigate to go to the checkout page
-        >
-          Proceed to Checkout
-          {console.log(cart.items)}
-        </button>
-      </div>
-    </div>
-  )
-}
+          <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[50vh]">
+            <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
+            <p className="mb-2">Items: <strong>{totalItems}</strong></p>
+            <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
+            <button
+              className="bg-yellow-600 hover:bg-orange-600 w-full py-2 rounded font-medium"
+              onClick={() =>
+                navigate('/checkout', {
+
+                  state: { items: cart.items, totalPrice }, // Pass cart and price to CheckoutPage
+                })
+              } // Use navigate to go to the checkout page
+            >
+              Proceed to Checkout
+              {console.log(cart.items)}
+            </button>
+          </div>
+        </div>
+      )
+      }
     </div >
   );
 }

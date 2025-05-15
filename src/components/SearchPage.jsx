@@ -1,22 +1,37 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import Modal from './Modal';
-import ProductCard from './ProductCard';
+import { SlidersHorizontal, X } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../slices/cartSlice';
 
 function SearchPage() {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
+
+  const [productData, setProductData] = useState([]);
+  const [filteredProductData, setFilteredProductData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const handleProductClick = (product) => setSelectedProduct(product);
   const closeModal = () => setSelectedProduct(null);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
-  const [Productdata, setProductData] = useState([]);
-  const [filteredProductData, setFilteredProductData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [localCart, setCart] = useState(() => {
+    // Initialize cart from localStorage on mount
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
-  // filter states
+  // const addToCart = (product) => {
+  //   const updatedCart = [...localCart, product];
+  //   localStorage.setItem('cart', JSON.stringify(updatedCart));
+  //   setCart(updatedCart);
+  // };
+
+  // Filter states
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(10000);
   const [brands, setBrands] = useState([]);
@@ -24,70 +39,217 @@ function SearchPage() {
   const [deals, setDeals] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [rating, setRating] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // recommendations
   const recommendations = ['Apple AirPods', 'Apple Watch', 'Apple iPad', 'Apple MacBook Pro'];
 
-  // fetch products
+  // Fetch products based on query
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
         const res = await fetch(`https://dummyjson.com/products/search?q=${query}&limit=100`);
         const data = await res.json();
-        setProductData(data.products);
+        setProductData(data.products || []);
       } catch (err) {
         console.error(err);
+        setProductData([]);
       }
       setLoading(false);
     }
     fetchData();
   }, [query]);
 
-
-
-
-  const [LocalCart,setCart]=useState([]);
-
-function addToCart(product) {
-  let existingCart = JSON.parse(localStorage.getItem('cart'));
-  const updatedCart = [...existingCart, product];
-  localStorage.setItem('cart', JSON.stringify(updatedCart));
-  setCart(updatedCart);
-}
-
-
-
-  // apply filters
+  // Filter products based on selected filters
   useEffect(() => {
-    let data = Productdata.filter(p => p.price >= min && p.price <= max);
-    if (brands.length) data = data.filter(p => brands.includes(p.brand));
-    if (departments.length) data = data.filter(p => departments.includes(p.category));
-    if (deals.includes('today')) data = data.filter(p => p.discountPercentage >= 10);
-    if (sellers.length) data = data.filter(p => sellers.includes(p.title));
-    if (rating) data = data.filter(p => Math.floor(p.rating) >= rating);
-    setFilteredProductData(data);
-  }, [Productdata, min, max, brands, departments, deals, sellers, rating]);
+    let data = productData.filter(p => p.price >= min && p.price <= max);
 
-  // handle recommendation click
+    if (brands.length > 0) data = data.filter(p => brands.includes(p.brand));
+    if (departments.length > 0) data = data.filter(p => departments.includes(p.category));
+    if (deals.includes('today')) data = data.filter(p => p.discountPercentage >= 10);
+    if (sellers.length > 0) data = data.filter(p => sellers.includes(p.title));
+    if (rating) data = data.filter(p => Math.floor(p.rating) >= rating);
+
+    setFilteredProductData(data);
+  }, [productData, min, max, brands, departments, deals, sellers, rating]);
+
   const handleRecomClick = (text) => {
     setSearchParams({ q: text });
   };
 
+  const renderFilterSections = () => (
+    <>
+      <div>
+        <h3 className="font-bold mb-2">Brands</h3>
+        <ul className="space-y-1 max-h-32 overflow-y-auto">
+          {["Apple", "365 by Whole Foods Market", "GoGo SqueeZ", "Amazon Fresh", "Quaker", "Mott's", "Bragg"].map(b => (
+            <li key={b} className="flex items-center">
+              <input
+                type="checkbox"
+                className="mr-2"
+                value={b}
+                checked={brands.includes(b)}
+                onChange={e => {
+                  const v = e.target.value;
+                  setBrands(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
+                }}
+              />
+              {b}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="font-bold mb-2">Department</h3>
+        <ul className="space-y-1">
+          {["electronics", "smartphones", "laptops", "fragrances"].map(c => (
+            <li key={c} className="flex items-center">
+              <input
+                type="checkbox"
+                className="mr-2"
+                value={c}
+                checked={departments.includes(c)}
+                onChange={e => {
+                  const v = e.target.value;
+                  setDepartments(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
+                }}
+              />
+              {c}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="font-bold mb-2">Price</h3>
+        <div className="flex items-center space-x-2">
+          <input
+            type="number"
+            className="w-20 p-1 border"
+            value={min}
+            min="0"
+            onChange={e => setMin(Number(e.target.value))}
+          />
+          <span>–</span>
+          <input
+            type="number"
+            className="w-20 p-1 border"
+            value={max}
+            min="0"
+            onChange={e => setMax(Number(e.target.value))}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-bold mb-2">Deals & Discounts</h3>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            value="today"
+            checked={deals.includes('today')}
+            onChange={e => setDeals(prev => e.target.checked ? [...prev, "today"] : prev.filter(x => x !== "today"))}
+            className="mr-2"
+          />
+          Today's Deals
+        </label>
+      </div>
+
+      <div>
+        <h3 className="font-bold mb-2">Seller</h3>
+        <ul className="space-y-1">
+          {["ZooScape", "Amazon.com"].map(s => (
+            <li key={s} className="flex items-center">
+              <input
+                type="checkbox"
+                className="mr-2"
+                value={s}
+                checked={sellers.includes(s)}
+                onChange={e => setSellers(prev => e.target.checked ? [...prev, s] : prev.filter(x => x !== s))}
+              />
+              {s}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="font-bold mb-2">Customer Reviews</h3>
+        {[4, 3, 2, 1].map(r => (
+          <label key={r} className="flex items-center">
+            <input
+              type="radio"
+              name="rating"
+              className="mr-2"
+              value={r}
+              checked={rating === r}
+              onChange={() => setRating(r)}
+            />
+            {r} Stars & Up
+          </label>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <div className="bg-gray-100 min-h-screen">
-      <Navbar />
-      <div className="container mx-auto px-4 py-6 flex gap-6">
-        <aside className="w-64 bg-white p-4 space-y-6 text-sm text-gray-700">
-          {/* show recommendations only when no query */}
+      <div className='fixed top-0 w-full'>
+
+        <Navbar />
+      </div>
+      <div className="container mx-auto px-4 py-6 flex gap-6 mt-10">
+        {/* Mobile filter toggle button */}
+        <div className="md:hidden fixed flex justify-end p-4">
+          <button onClick={() => setIsOpen(true)} aria-label="Open Filters">
+            <SlidersHorizontal size={28} />
+          </button>
+        </div>
+
+        {/* Sidebar Filters - Desktop */}
+        <aside className="hidden md:block w-64 bg-white p-4 space-y-6 text-sm text-gray-700">
           {!query && (
             <div>
               <h3 className="font-bold mb-2">Explore Related Products</h3>
               <ul className="space-y-1">
                 {recommendations.map(item => (
-                  <li key={item}
+                  <li
+                    key={item}
                     className="hover:underline cursor-pointer"
-                    onClick={() => handleRecomClick(item)}>
+                    onClick={() => handleRecomClick(item)}
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {renderFilterSections()}
+        </aside>
+
+        {/* Mobile Slide-In Filters */}
+        <div
+          className={`fixed top-0 left-0 h-full w-[85%] sm:w-[70%] bg-white z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+            } md:hidden p-4 text-sm text-gray-700 overflow-y-auto`}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Filters</h2>
+            <button onClick={() => setIsOpen(false)} aria-label="Close Filters">
+              <X size={24} />
+            </button>
+          </div>
+
+          {!query && (
+            <div>
+              <h3 className="font-bold mb-2">Explore Related Products</h3>
+              <ul className="space-y-1">
+                {recommendations.map(item => (
+                  <li
+                    key={item}
+                    className="hover:underline cursor-pointer"
+                    onClick={() => handleRecomClick(item)}
+                  >
                     {item}
                   </li>
                 ))}
@@ -95,129 +257,66 @@ function addToCart(product) {
             </div>
           )}
 
-          <div>
-            <h3 className="font-bold mb-2">Brands</h3>
-            <ul className="space-y-1 max-h-32 overflow-y-auto">
-              {['Apple', '365 by Whole Foods Market', 'GoGo SqueeZ', 'Amazon Fresh', 'Quaker', 'Mott\'s', 'Bragg'].map(b => (
-                <li key={b} className="flex items-center">
-                  <input type="checkbox" className="mr-2" value={b}
-                    onChange={e => {
-                      const v = e.target.value;
-                      setBrands(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
-                    }} />{b}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {renderFilterSections()}
+        </div>
 
-          <div>
-            <h3 className="font-bold mb-2">Department</h3>
-            <ul className="space-y-1">
-              {['electronics', 'smartphones', 'laptops', 'fragrances'].map(c => (
-                <li key={c} className="flex items-center">
-                  <input type="checkbox" className="mr-2" value={c}
-                    onChange={e => {
-                      const v = e.target.value;
-                      setDepartments(prev => e.target.checked ? [...prev, v] : prev.filter(x => x !== v));
-                    }} />{c}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Overlay when mobile filter is open */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
 
-          <div>
-            <h3 className="font-bold mb-2">Price</h3>
-            <div className="flex items-center space-x-2">
-              <input type="number" className="w-20 p-1 border" value={min}
-                min="0" onChange={e => setMin(Number(e.target.value))} />
-              <span>–</span>
-              <input type="number" className="w-20 p-1 border" value={max}
-                min="0" onChange={e => setMax(Number(e.target.value))} />
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1">
+          {loading && (
+            <div className="flex justify-center items-center h-64 col-span-full">
+              <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" />
             </div>
-          </div>
-
-          <div>
-            <h3 className="font-bold mb-2">Deals & Discounts</h3>
-            <label className="flex items-center">
-              <input type="checkbox" value="today"
-                onChange={e => setDeals(prev => e.target.checked ? [...prev, 'today'] : prev.filter(x => x !== 'today'))}
-                className="mr-2" />Today's Deals
-            </label>
-          </div>
-
-          <div>
-            <h3 className="font-bold mb-2">Seller</h3>
-            <ul className="space-y-1">
-              {['ZooScape', 'Amazon.com'].map(s => (
-                <li key={s} className="flex items-center">
-                  <input type="checkbox" className="mr-2" value={s}
-                    onChange={e => setSellers(prev => e.target.checked ? [...prev, s] : prev.filter(x => x !== s))}
-                  />{s}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-bold mb-2">Customer Reviews</h3>
-            {[4, 3, 2, 1].map(r => (
-              <label key={r} className="flex items-center">
-                <input type="radio" name="rating" className="mr-2" value={r}
-                  onChange={() => setRating(r)} />{r} Stars & Up
-              </label>
-            ))}
-          </div>
-        </aside>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          )}
+          {!loading && filteredProductData.length === 0 && (
+            <p className="col-span-full text-center text-gray-500">No products found.</p>
+          )}
           {!loading &&
-            filteredProductData.map((product, index) => {
-              const img = product.images?.[0];
-              return (
-                <div
-                  key={index}
-                  className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
-                  onClick={() => handleProductClick(product)}    // sending the product to the modal and avoid realling the fetch api if use id
-                >
-                  {img && (
-                    <img
-                      src={img}
-                      alt={product.title}
-                      className="w-full h-40 object-contain mb-2"
-                      onClick={ ()=>{}}
-                    />
-                  )}
-                  <h3 className="font-medium text-sm mb-1 truncate">
-                    {product.title}
-                  </h3>
-                  <div className="text-orange-500 text-xl mb-1">
-                    {"★".repeat(Math.floor(product.rating || 0))}
-                    {"☆".repeat(5 - Math.floor(product.rating || 0))}
-                  </div>
-                  <p className="text-base font-semibold text-gray-900">
-                    $ {product.price}
-                  </p>
-                  <button
-                    className="mt-2 w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
-                    onClick={() => addToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
+            filteredProductData.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                onClick={() => handleProductClick(product)}
+              >
+                {product.images?.[0] && (
+                  <img
+                    src={product.images[0]}
+                    alt={product.title}
+                    className="w-full h-40 object-contain mb-2"
+                  />
+                )}
+                <h3 className="font-medium text-sm">{product.title}</h3>
+                <p className="text-sm text-gray-500 truncate">{product.description}</p>
+                <p className="text-blue-600 font-bold">₹ {product.price}</p>
+                <button
+                  className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent modal open
+                    console.log("Trying to add to cart:", product);
+                    dispatch(addToCart(product));
+                    console.log("Added to cart ");
+                    alert(`${product.title} Added to Cart`)
 
-                  <button
-                    className="mt-2 w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm"
-                    onClick={() => buynow(product)}
-                  >
-                    Buy Now
-                  </button>
-                </div>
-              );
-            })}
-            {selectedProduct && (
-              <Modal selectedProduct={selectedProduct} closeModal={closeModal} addToCart={addToCart} />
-            )}
+                    ;
+                  }}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            ))}
         </div>
       </div>
+
+      {selectedProduct && (
+        <Modal product={selectedProduct} onClose={closeModal} onAddToCart={addToCart} />
+      )}
     </div>
   );
 }
