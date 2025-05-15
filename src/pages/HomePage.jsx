@@ -41,14 +41,14 @@ const HomePage = ({ cart, setCart }) => {
       <Navbar cart={cart} setCart={setCart} />
       <CarouselCard />
 
-      <main className="flex-1 px-2 sm:px-6 py-6 relative sm:-top-40">
+      <main className="flex-1 px-2 sm:px-6 -py-6 relative sm:-top-40">
         {loading && (
           <div className="flex justify-center items-center h-64">
             <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" />
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 relative -top-[120px]">
           {!loading &&
             Productdata.map((product) => {
               const img = product.images?.[0];
@@ -81,6 +81,7 @@ const HomePage = ({ cart, setCart }) => {
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent modal open
                         dispatch(addToCart(product));
+                        alert(`${product.title}Product Added !!!`)
                       }}
                     >
                       Add to Cart

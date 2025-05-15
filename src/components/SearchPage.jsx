@@ -293,8 +293,12 @@ function SearchPage() {
                   />
                 )}
                 <h3 className="font-medium text-sm">{product.title}</h3>
+                <div className="text-orange-500 text-xl mb-1">
+                    {"★".repeat(Math.floor(product.rating || 0))}
+                    {"☆".repeat(5 - Math.floor(product.rating || 0))}
+                  </div>
                 <p className="text-sm text-gray-500 truncate">{product.description}</p>
-                <p className="text-blue-600 font-bold">₹ {product.price}</p>
+                <p className="text-blue-600 font-bold">$ {product.price}</p>
                 <button
                   className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
                   onClick={(e) => {

@@ -35,7 +35,7 @@ const Navbar = ({ setSearchTerm }) => {
         </div>
 
         {/* Middle: Searchbar */}
-        <div className="flex-grow max-w-[450px] mx-4">
+        <div className="flex-grow max-w-[550px] mx-4 text-black">
           <Searchbar setSearchTerm={setSearchTerm} />
         </div>
 
@@ -143,7 +143,7 @@ const Navbar = ({ setSearchTerm }) => {
         </>
       )}
 
-      {/* User Modal */}
+      
       {showModal && <UserModal onClose={() => setShowModal(false)} />}
     </>
   );

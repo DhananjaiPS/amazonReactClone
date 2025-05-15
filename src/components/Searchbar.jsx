@@ -96,7 +96,7 @@ const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), [
           onKeyDown={onKeyDown}
         />
         {value && (
-          <button onClick={clearAll} className="p-2">
+          <button onClick={clearAll} className="p-2 text-white">
             <X size={18} />
           </button>
         )}

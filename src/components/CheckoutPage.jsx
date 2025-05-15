@@ -44,7 +44,7 @@ function CheckoutPage() {
   );
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex">
+    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
       {/* Left: Items List */}
       <div className="flex-1 space-y-4">
         <h2 className="text-2xl font-semibold mb-6">Checkout</h2>
@@ -73,7 +73,7 @@ function CheckoutPage() {
       </div>
 
       {/* Right: Summary + Payment */}
-      <div className="w-[300px] ml-8 space-y-4">
+      <div className="w-[300px] ml-8 space-y-4 flex flex-col">
         <div className="bg-white p-4 rounded shadow-md">
           <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
           <p className="mb-2">Items: <strong>{filteredItems.length}</strong></p>

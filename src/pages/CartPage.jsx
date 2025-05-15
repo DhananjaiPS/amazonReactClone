@@ -87,12 +87,13 @@ function CartPage() {
                       >
                         -
                       </button>
-                      <input
+                      {/* <input
                         type="number"
                         value={element.quantity}
                         readOnly
                         className="w-10 text-center border rounded bg-gray-100"
-                      />
+                      /> */}
+                      <p>{element.quantity}</p>
                       <button
                         className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
                         onClick={() => dispatch(addQuantity(element.product.id))}
