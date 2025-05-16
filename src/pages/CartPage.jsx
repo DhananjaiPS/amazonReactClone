@@ -130,7 +130,7 @@ function CartPage() {
 
 
           {/* Cart Summary */}
-          <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[36vh]">
+          <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[80%]">
             <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
             <p className="mb-2">Items: <strong>{totalItems}</strong></p>
             <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
