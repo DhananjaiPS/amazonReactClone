@@ -8,12 +8,14 @@ import { useDispatch } from "react-redux";
 import { Heart } from '@phosphor-icons/react';
 import { saveToWatchlist } from "../../slices/cartSlice"; // Import the action to save to watchlist
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import gifLoader from "../components/gifLoader";
 const HomePage = ({ cart, setCart }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [Productdata, setProductData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+const [addedToCart, setAddedToCart] = useState([]);
+const navigate=useNavigate();
   useEffect(() => {
     async function fetchData() {
       try {
@@ -49,6 +51,47 @@ const HomePage = ({ cart, setCart }) => {
     dispatch(saveToWatchlist(product));
     // alert(`${product.title}Product Added to Watchlist !!!`)
   };
+
+  
+  const [location, setLocation] = useState(null);
+ const [city, setCity] = useState(null);
+  
+
+  const [error, setError] = useState('');
+useEffect(() => {
+   navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=9740e24e1099431fa367fd5aa00d7a10`
+          );
+          const data = await response.json();
+
+          const components = data.results[0].components;
+          const city =
+            components.city ||
+            components.town ||
+            components.village ||
+            components.state;
+          const country = components.country;
+          const stateName = components.state;
+          // const state = components.state_district;
+          setCity(city ? ` ${city}` : 'Location not found');
+          setLocation(`${stateName}, ${country}`);
+        } catch (error) {
+          setCity('Error fetching location');
+          console.error(error);
+        }
+      },
+      (error) => {
+        setLocation('Location access denied. Please enable it in your browser.');
+        console.error(error);
+      }
+    );
+  }, []);
+
 
 
   return (
@@ -122,14 +165,19 @@ const HomePage = ({ cart, setCart }) => {
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent modal open
                         dispatch(addToCart(product));
-                        alert(`${product.title}Product Added !!!`)
+                        // alert(`${product.title}Product Added !!!`)
+                        setAddedToCart((prev) => [...new Set([...prev, product.id])]);
                       }}
                     >
-                      Add to Cart
+                      {addedToCart.includes(product.id) ? 'Added' : 'Add to Cart'}
                     </button>
                     <button
                       className="w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) =>{ 
+                        e.stopPropagation()
+                        navigate('/buy-now', { state: { product } });
+
+                      }}
                     >
                       Buy Now
                     </button>

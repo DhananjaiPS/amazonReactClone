@@ -5,13 +5,14 @@ import Modal from './Modal';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../slices/cartSlice';
-import {Heart } from '@phosphor-icons/react';
+import { Heart } from '@phosphor-icons/react';
 import { useSelector } from 'react-redux';
 import { saveToWatchlist } from '../../slices/cartSlice'; // Import the action to save to watchlist
 function SearchPage() {
   // const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+const [addedToCart, setAddedToCart] = useState([]);
 
   const [productData, setProductData] = useState([]);
   const [filteredProductData, setFilteredProductData] = useState([]);
@@ -32,7 +33,7 @@ function SearchPage() {
   //   localStorage.setItem('cart', JSON.stringify(updatedCart));
   //   setCart(updatedCart);
   // };
- const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [toggle, setToggle] = useState(false);
   const watchlist = useSelector((state) => state.cart.watchlist);
 
@@ -287,14 +288,14 @@ function SearchPage() {
             <div className="flex justify-center items-center h-64 col-span-full">
               {/* <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" /> */}
               <video
-              autoPlay
-              loop
-              muted
-              className="w-40 h-40"
-            >
-              <source src="/Amazon.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+                autoPlay
+                loop
+                muted
+                className="w-40 h-40"
+              >
+                <source src="/Amazon.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
           {!loading && filteredProductData.length === 0 && (
@@ -308,19 +309,19 @@ function SearchPage() {
                 onClick={() => handleProductClick(product)}
               >
                 <div className="flex justify-end" onClick={(e) => {
-                    e.stopPropagation(); // Prevent modal open
-                    handelHeartClick(product);
+                  e.stopPropagation(); // Prevent modal open
+                  handelHeartClick(product);
 
 
-                  }}>
-                    {/* {toggle ? <Heart size={32} weight="fill" /> : <Heart size={32} />} */}
-                    {watchlist.some((item) => item.product.id === product.id) ? (
-                      <Heart size={32} weight="fill" className="text-red-500" />
-                    ) : (
-                      <Heart size={32} className="text-gray-600" />
-                    )}
+                }}>
+                  {/* {toggle ? <Heart size={32} weight="fill" /> : <Heart size={32} />} */}
+                  {watchlist.some((item) => item.product.id === product.id) ? (
+                    <Heart size={32} weight="fill" className="text-red-500" />
+                  ) : (
+                    <Heart size={32} className="text-gray-600" />
+                  )}
 
-                  </div>
+                </div>
                 {product.images?.[0] && (
                   <img
                     src={product.images[0]}
@@ -329,27 +330,38 @@ function SearchPage() {
                   />
                 )}
                 <div className='flex flex-col gap-2 itmes-end-center justify-end flex h-[176px]'>
-                <h3 className="font-medium text-sm">{product.title}</h3>
-                <div className="text-orange-500 text-xl mb-1">
+                  <h3 className="font-medium text-sm">{product.title}</h3>
+                  <div className="text-orange-500 text-xl mb-1">
                     {"★".repeat(Math.floor(product.rating || 0))}
                     {"☆".repeat(5 - Math.floor(product.rating || 0))}
                   </div>
-                <p className="text-sm text-gray-500 truncate">{product.description}</p>
-                <p className="text-blue-600 font-bold">$ {product.price}</p>
-                <button
-                  className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm   " 
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent modal open
-                    console.log("Trying to add to cart:", product);
-                    dispatch(addToCart(product));
-                    console.log("Added to cart ");
-                    alert(`${product.title} Added to Cart`)
+                  <p className="text-sm text-gray-500 truncate">{product.description}</p>
+                  <p className="text-blue-600 font-bold">$ {product.price}</p>
+                  {/* <button
+                    className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm   "
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent modal open
+                      console.log("Trying to add to cart:", product);
+                      dispatch(addToCart(product));
+                      console.log("Added to cart ");
+                      alert(`${product.title} Added to Cart`)
 
-                    ;
-                  }}
-                >
-                  Add to Cart
-                </button>
+                        ;
+                    }}
+                  >
+                    Add to Cart
+                  </button> */}
+                  <button
+                    className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent modal open
+                      dispatch(addToCart(product));
+                      // alert(`${product.title}Product Added !!!`)
+                      setAddedToCart((prev) => [...new Set([...prev, product.id])]);
+                    }}
+                  >
+                    {addedToCart.includes(product.id) ? 'Added' : 'Add to Cart'}
+                  </button>
                 </div>
               </div>
             ))}

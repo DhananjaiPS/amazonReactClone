@@ -95,7 +95,7 @@ function CheckoutPage() {
             Complete Payment
           </button>
         ) : (
-          <div className="absolute inset-0  flex items-center justify-center z-50 w-[40vh] top-100">
+          <div className="absolute inset-0  flex items-center justify-center z-50 w-full top-100">
             <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center  w-[40vh]">
               <img
                 src="https://i.gifer.com/7efs.gif"
@@ -111,6 +111,9 @@ function CheckoutPage() {
             </div>
           </div>
         )}
+
+
+        
       </div>
     </div>
   );

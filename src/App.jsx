@@ -8,6 +8,7 @@ import CheckoutPage from './components/CheckoutPage';
 import WatchlistPage from './components/WatchlistPage';
 import { Provider } from 'react-redux';
 import store from './data/store';
+import BuyNowPage from './pages/BuyNowPage';
 
 function App() {
  
@@ -47,6 +48,7 @@ function App() {
         <Route path='/login' element={<Login/>} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/wishlist" element={<WatchlistPage/>} />
+        <Route path='/buy-now'  element={<BuyNowPage/>}/>
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
       
