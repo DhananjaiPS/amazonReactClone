@@ -135,7 +135,7 @@ function CartPage() {
             <p className="mb-2">Items: <strong>{totalItems}</strong></p>
             <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
             <button
-              className="bg-yellow-600 hover:bg-orange-600 w-[50%] py-2 rounded font-medium"
+              className="bg-yellow-600 hover:bg-orange-600 w-[80%] py-2 rounded font-medium"
               onClick={() =>
                 navigate('/checkout', {
 
