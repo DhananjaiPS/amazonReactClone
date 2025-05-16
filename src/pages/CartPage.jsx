@@ -5,7 +5,10 @@ import { useDispatch } from 'react-redux'; // Import useDispatch to dispatch act
 import { removeItem } from '../../slices/cartSlice'; // Import the action to remove an item from the cart
 import { addToCart } from '../../slices/cartSlice'; // Import the action to add an item to the cart
 import { addQuantity } from '../../slices/cartSlice'; // Import the action to add quantity of an item in the cart
-import { removeQuantity } from '../../slices/cartSlice'; // Import the action to remove quantity of an item in the cart
+import { removeQuantity, saveToWatchlist } from '../../slices/cartSlice'; // Import the action to remove quantity of an item in the cart
+import { ArrowBendUpLeft } from "@phosphor-icons/react";
+import App from "../App"
+import ReactDOM from "react-dom";
 function CartPage() {
   // const [cart, setCart] = useState([]);
   const dispatch = useDispatch(); //instance banana hoga
@@ -39,7 +42,13 @@ function CartPage() {
 
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
+      <div className="flex items-center text-blue-500 cursor-pointer mb-6"
+        onClick={() => { navigate('/') }}>
+        <ArrowBendUpLeft size={32} />
+        Back
+      </div>
+
       {cart.items.length === 0 ? (
         <div className="text-center mt-20">
           <h2 className="text-2xl font-semibold mb-4">Your Cart is empty</h2>
@@ -52,7 +61,7 @@ function CartPage() {
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row lg:flex-wrap gap-6">
-  
+          {/* <div className="flex " onClick={()=>{navigate('/')}}><ArrowBendUpLeft size={32} /> Back</div> */}
           <div className="lg:col-span-2 space-y-6 w-full">
             {cart.items.map((element, index) => {
               const img = element.product.images?.[0];
@@ -109,8 +118,8 @@ function CartPage() {
                       >
                         Delete
                       </button>
-                      <button className="text-blue-600 hover:underline">Save for later</button>
-                      <button className="text-blue-600 hover:underline">See more like this</button>
+                      <button className="text-blue-600 hover:underline" onClick={() => { dispatch(saveToWatchlist(element.product)) }}>Save for later</button>
+                      {/* <button className="text-blue-600 hover:underline">See more like this</button> */}
                     </div>
                   </div>
                 </div>
@@ -121,12 +130,12 @@ function CartPage() {
 
 
           {/* Cart Summary */}
-          <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[50vh]">
+          <div className="sticky  self-start bg-white p-4 rounded shadow-md w-[36vh]">
             <h2 className="text-lg font-bold mb-3">Cart Summary</h2>
             <p className="mb-2">Items: <strong>{totalItems}</strong></p>
             <p className="mb-4">Total: <strong>$ {totalPrice.toLocaleString()}</strong></p>
             <button
-              className="bg-yellow-600 hover:bg-orange-600 w-full py-2 rounded font-medium"
+              className="bg-yellow-600 hover:bg-orange-600 w-[50%] py-2 rounded font-medium"
               onClick={() =>
                 navigate('/checkout', {
 

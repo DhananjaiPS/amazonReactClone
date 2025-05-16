@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import Searchbar from "./Searchbar";
-import { ShoppingCart, List } from "@phosphor-icons/react"; // Added List for hamburger icon
+import { ShoppingCart, List ,Bag,MapPin } from "@phosphor-icons/react"; // Added List for hamburger icon
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo ,useEffect} from "react";
 import UserModal from "./UserModal";
 import { useSelector } from "react-redux";
+import './NavBar.css'
 
 const Navbar = ({ setSearchTerm }) => {
   const cart = useSelector((store) => store.cart);
@@ -19,10 +20,59 @@ const Navbar = ({ setSearchTerm }) => {
     return cart.items.reduce((acc, item) => acc + (isNaN(item.quantity) ? 0 : item.quantity), 0);
   }, [cart]);
 
+  const [location, setLocation] = useState(null);
+ const [city, setCity] = useState(null);
+  
+
+  const [error, setError] = useState('');
+useEffect(() => {
+   navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=9740e24e1099431fa367fd5aa00d7a10`
+          );
+          const data = await response.json();
+
+          const components = data.results[0].components;
+          const city =
+            components.city ||
+            components.town ||
+            components.village ||
+            components.state;
+          const country = components.country;
+          const stateName = components.state;
+          // const state = components.state_district;
+          setCity(city ? ` ${city}` : 'Location not found');
+          setLocation(`${stateName}, ${country}`);
+        } catch (error) {
+          setCity('Error fetching location');
+          console.error(error);
+        }
+      },
+      (error) => {
+        setLocation('Location access denied. Please enable it in your browser.');
+        console.error(error);
+      }
+    );
+  }, []);
+
+
+
+
+
+
+
+
+
+
   return (
     <>
       <div className="w-full flex items-center bg-[#131921] text-white font-roboto py-2 px-3 justify-between relative z-20">
-        {/* Left side: Logo hidden on mobile */}
+        {/* Left side: Logo hidden on mobile */} 
+        
         <div className="hidden sm:flex items-center gap-3">
           <div className="flex scale-[0.9] cursor-pointer" onClick={() => navigate("/")}>
             <div
@@ -35,6 +85,14 @@ const Navbar = ({ setSearchTerm }) => {
         </div>
 
         {/* Middle: Searchbar */}
+        <div className="hide-on-small">
+          <div className="flex items-center gap-2 text-white text-sm hide-on-small"
+          >
+
+          <MapPin size={25} /> {city} 
+          </div>
+          <span className="text-sm text-gray-400 flex justify-center">{location}</span>
+        </div>
         <div className="flex-grow max-w-[550px] mx-4 text-black">
           <Searchbar setSearchTerm={setSearchTerm} />
         </div>
@@ -59,11 +117,16 @@ const Navbar = ({ setSearchTerm }) => {
         </div>
 
         {/* Right side on desktop: full nav */}
-        <ul className="hidden sm:flex gap-8 text-lg items-center">
+        <ul className="hidden sm:flex gap-16 text-lg items-center">
           <li className="flex items-center gap-1 text-sm cursor-pointer">
             <img src="/indian_flag.png" alt="indian flag" className="h-4" />
             <p>EN</p>
             <img src="/dropdown.png" alt="dropdown" />
+          </li>
+          <li className="flex items-center gap-1 text-sm cursor-pointer">
+            <Bag size={32}  onClick={()=>{  navigate("/wishlist")}}/>
+            {/* <p>EN</p> */}
+            {/* <img src="/dropdown.png" alt="dropdown" /> */}
           </li>
 
           <li className="text-sm cursor-pointer">
@@ -72,7 +135,7 @@ const Navbar = ({ setSearchTerm }) => {
               <p className="flex font-bold cursor-pointer" onClick={() => setShowModal(true)}>
                 Accounts & Lists
                 <span>
-                  <img src="/dropdown.png" alt="dropdown" />
+                  {/* <img src="/dropdown.png" alt="dropdown" /> */}
                 </span>
               </p>
               {showModal && <UserModal onClose={() => setShowModal(false)} />}
@@ -120,7 +183,10 @@ const Navbar = ({ setSearchTerm }) => {
                 { text: `Hello, ${username}`, action: () => navigate("/login") },
                 { text: "Accounts & Lists", action: () => setShowModal(true) },
                 { text: "Returns & Orders", action: () => navigate("/orders") },
+                { text: "Your Wishlist", action: () => navigate("/wishlist") },
+                
                 { text: "Cart", action: () => navigate("/cart") },
+                { text: `Location : ${city}`},
               ].map((item, idx) => (
                 <div
                   key={idx}

@@ -125,13 +125,13 @@ const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), [
               <div className="flex gap-2">
                 <button
                   onClick={sendRecommendation}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded"
+                  className="flex-1 bg-black text-white text-sm py-2 rounded"
                 >
                   Send Recommendation
                 </button>
                 <button
                   onClick={continueShopping}
-                  className="flex-1 bg-yellow-500 text-white py-2 rounded"
+                  className="flex-1 bg-orange-500 text-white text-sm py-2 rounded"
                 >
                   Continue Shopping
                 </button>

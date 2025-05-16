@@ -5,7 +5,7 @@ import CartPage from './pages/CartPage';
 import SearchPage from './components/SearchPage';
 import Login from './components/Login';
 import CheckoutPage from './components/CheckoutPage';
-
+import WatchlistPage from './components/WatchlistPage';
 import { Provider } from 'react-redux';
 import store from './data/store';
 
@@ -46,6 +46,7 @@ function App() {
         />
         <Route path='/login' element={<Login/>} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/wishlist" element={<WatchlistPage/>} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
       

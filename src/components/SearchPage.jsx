@@ -5,9 +5,11 @@ import Modal from './Modal';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../slices/cartSlice';
-
+import {Heart } from '@phosphor-icons/react';
+import { useSelector } from 'react-redux';
+import { saveToWatchlist } from '../../slices/cartSlice'; // Import the action to save to watchlist
 function SearchPage() {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
@@ -30,6 +32,17 @@ function SearchPage() {
   //   localStorage.setItem('cart', JSON.stringify(updatedCart));
   //   setCart(updatedCart);
   // };
+ const dispatch = useDispatch();
+  const [toggle, setToggle] = useState(false);
+  const watchlist = useSelector((state) => state.cart.watchlist);
+
+  const handelHeartClick = (product) => {
+
+    const isHearted = watchlist.some((item) => item.product.id === product.id);
+    setToggle(isHearted);
+    dispatch(saveToWatchlist(product));
+    // alert(`${product.title}Product Added to Watchlist !!!`)
+  };
 
   // Filter states
   const [min, setMin] = useState(0);
@@ -199,7 +212,7 @@ function SearchPage() {
 
         <Navbar />
       </div>
-      <div className="container mx-auto px-4 py-6 flex gap-6 mt-10">
+      <div className="container mx-auto px-4 py-6 flex gap-6 mt-10 ">
         {/* Mobile filter toggle button */}
         <div className="md:hidden fixed flex justify-end p-4">
           <button onClick={() => setIsOpen(true)} aria-label="Open Filters">
@@ -272,7 +285,16 @@ function SearchPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1">
           {loading && (
             <div className="flex justify-center items-center h-64 col-span-full">
-              <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" />
+              {/* <img src="/animation3.gif" alt="Loading..." className="w-40 h-40" /> */}
+              <video
+              autoPlay
+              loop
+              muted
+              className="w-40 h-40"
+            >
+              <source src="/Amazon.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             </div>
           )}
           {!loading && filteredProductData.length === 0 && (
@@ -282,9 +304,23 @@ function SearchPage() {
             filteredProductData.map((product) => (
               <div
                 key={product.id}
-                className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer flex flex-col gap-2 "
                 onClick={() => handleProductClick(product)}
               >
+                <div className="flex justify-end" onClick={(e) => {
+                    e.stopPropagation(); // Prevent modal open
+                    handelHeartClick(product);
+
+
+                  }}>
+                    {/* {toggle ? <Heart size={32} weight="fill" /> : <Heart size={32} />} */}
+                    {watchlist.some((item) => item.product.id === product.id) ? (
+                      <Heart size={32} weight="fill" className="text-red-500" />
+                    ) : (
+                      <Heart size={32} className="text-gray-600" />
+                    )}
+
+                  </div>
                 {product.images?.[0] && (
                   <img
                     src={product.images[0]}
@@ -292,6 +328,7 @@ function SearchPage() {
                     className="w-full h-40 object-contain mb-2"
                   />
                 )}
+                <div className='flex flex-col gap-2 itmes-end-center justify-end flex h-[176px]'>
                 <h3 className="font-medium text-sm">{product.title}</h3>
                 <div className="text-orange-500 text-xl mb-1">
                     {"★".repeat(Math.floor(product.rating || 0))}
@@ -300,7 +337,7 @@ function SearchPage() {
                 <p className="text-sm text-gray-500 truncate">{product.description}</p>
                 <p className="text-blue-600 font-bold">$ {product.price}</p>
                 <button
-                  className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
+                  className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm   " 
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent modal open
                     console.log("Trying to add to cart:", product);
@@ -313,6 +350,7 @@ function SearchPage() {
                 >
                   Add to Cart
                 </button>
+                </div>
               </div>
             ))}
         </div>
