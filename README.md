@@ -1,6 +1,7 @@
 # Amazon React Clone 🚀
 
-![Amazon Clone Screenshot](https://github.com/DhananjaiPS/amazonReactClone/raw/main/screenshot.png)
+![Uploading image.png…]()
+
 
 ## 🌟 Live Demo
 👉 [Experience the Demo](https://amazon-react-clone-five.vercel.app/) 👈
