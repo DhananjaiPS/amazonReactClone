@@ -1,8 +1,5 @@
 # Amazon React Clone 🚀
 
-![Uploading image.png…]()
-
-
 ## 🌟 Live Demo
 👉 [Experience the Demo](https://amazon-react-clone-five.vercel.app/) 👈
 
