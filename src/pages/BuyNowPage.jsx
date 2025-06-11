@@ -106,7 +106,7 @@ const BuyNowPage = () => {
                 <img src={product.images[0]} alt={product.title} className="w-32 h-32 object-contain" />
                 <div>
                   <h4 className="text-md font-semibold">{product.title}</h4>
-                  <p className="text-orange-600 font-bold text-lg">₹ {product.price * 83}</p>
+                  <p className="text-orange-600 font-bold text-lg">$ {product.price * 83}</p>
                   <p className="text-sm text-gray-600 mt-1">In Stock</p>
                 </div>
               </div>
@@ -140,7 +140,7 @@ const BuyNowPage = () => {
             <hr className="my-2" />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>₹{product ? product.price * 83 : 0}</span>
+              <span>$ {product ? product.price * 83 : 0}</span>
             </div>
 
             {isPaying ? (

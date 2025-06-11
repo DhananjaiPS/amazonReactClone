@@ -1,25 +1,40 @@
-@media (max-width: 450px) {
-  .hide-on-small {
-    display: none;
-  }
-}
-/* App.css or global CSS */
-@keyframes shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
+/* Ensure the navbar stays fixed at the top */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.shimmer {
-  background: linear-gradient(
-    to right,
-    #e0e0e0 0%,
-    #f8f8f8 50%,
-    #e0e0e0 100%
-  );
-  background-size: 800px 100%;
-  animation: shimmer 1.5s infinite linear;
+/* Better touch targets for mobile */
+button, [role="button"] {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Compact search bar style */
+.searchbar.compact {
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 350px) {
+  .navbar-logo {
+    width: 70px;
+    height: 25px;
+    background-size: 250px auto;
+    background-position: -5px -90px;
+  }
+  
+  .navbar-icons {
+    gap: 2px;
+  }
+}
+@media (max-width: 400px) {
+  .logo-hide-sm {
+    display: none !important;
+  }
 }

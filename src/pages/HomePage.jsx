@@ -3,19 +3,42 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
-import { addToCart } from "../../slices/cartSlice";
+import { addToCart, saveToWatchlist, addQuantityWatchlist, removeQuantityWatchlist } from "../../slices/cartSlice";
 import { useDispatch } from "react-redux";
 import { Heart } from '@phosphor-icons/react';
-import { saveToWatchlist } from "../../slices/cartSlice"; // Import the action to save to watchlist
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import gifLoader from "../components/gifLoader";
+import { useMemo } from "react";
 const HomePage = ({ cart, setCart }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [Productdata, setProductData] = useState([]);
   const [loading, setLoading] = useState(false);
 const [addedToCart, setAddedToCart] = useState([]);
 const navigate=useNavigate();
+
+  // const cart = useSelector(store => store.cart);
+
+  let quantity = 0;
+  const totalItems = useMemo(() => {
+    if (!cart || !cart.watchlist) return 0;
+    for (let i = 0; i < cart.watchlist.length; i++) {
+      quantity += cart.watchlist[i].quantity;
+    }
+    return quantity;
+  }, [cart]);
+  // Total price calc
+    let totalPrice = 0;
+if (cart && cart.watchlist) {
+  cart.watchlist.forEach((item) => {
+    totalPrice += item.product.price * item.quantity;
+  });
+}
+
+    function remove(id) {
+      dispatch(removeItem(id))
+    }
+  
   useEffect(() => {
     async function fetchData() {
       try {
@@ -128,12 +151,35 @@ useEffect(() => {
                   onClick={() => handleProductClick(product)}
                 >
 
-                  <div className="flex justify-end" onClick={(e) => {
+                  <div className="flex justify-between" onClick={(e) => {
                     e.stopPropagation(); // Prevent modal open
                     handelHeartClick(product);
 
 
                   }}>
+                    {addedToCart.includes(product.id) && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm text-gray-600">Qty:</span>
+                        <button
+                          className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
+                          onClick={() => dispatch(removeQuantityWatchlist(product.id))}
+                        >
+                          -
+                        </button>
+                        <p>
+                          {
+                            // Find the cart item for this product to show its quantity
+                            (cart?.watchlist?.find(item => item.product.id === product.id)?.quantity) || 1
+                          }
+                        </p>
+                        <button
+                          className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
+                          onClick={() => dispatch(addQuantityWatchlist(product.id))}
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                     {/* {toggle ? <Heart size={32} weight="fill" /> : <Heart size={32} />} */}
                     {watchlist.some((item) => item.product.id === product.id) ? (
                       <Heart size={32} weight="fill" className="text-red-500" />
@@ -160,6 +206,7 @@ useEffect(() => {
                     ${product.price}
                   </p>
                   <div className="flex flex-col gap-2 mt-2">
+                    
                     <button
                       className="w-full py-1 bg-yellow-400 hover:bg-yellow-500 rounded text-sm"
                       onClick={(e) => {
@@ -171,6 +218,7 @@ useEffect(() => {
                     >
                       {addedToCart.includes(product.id) ? 'Added' : 'Add to Cart'}
                     </button>
+
                     <button
                       className="w-full py-1 bg-orange-400 hover:bg-orange-500 rounded text-sm"
                       onClick={(e) =>{ 

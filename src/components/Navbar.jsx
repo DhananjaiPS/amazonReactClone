@@ -1,11 +1,10 @@
-import { Link } from "react-router-dom";
-import Searchbar from "./Searchbar";
-import { ShoppingCart, List ,Bag,MapPin } from "@phosphor-icons/react"; // Added List for hamburger icon
-import { useNavigate } from "react-router-dom";
-import { useState, useMemo ,useEffect} from "react";
-import UserModal from "./UserModal";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, List, Bag, MapPin } from "@phosphor-icons/react";
+import { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
-import './NavBar.css'
+import Searchbar from "./Searchbar";
+import UserModal from "./UserModal";
+import './NavBar.css';
 
 const Navbar = ({ setSearchTerm }) => {
   const cart = useSelector((store) => store.cart);
@@ -21,134 +20,101 @@ const Navbar = ({ setSearchTerm }) => {
   }, [cart]);
 
   const [location, setLocation] = useState(null);
- const [city, setCity] = useState(null);
-  
+  const [city, setCity] = useState(null);
 
-  const [error, setError] = useState('');
-useEffect(() => {
-   navigator.geolocation.getCurrentPosition(
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-
         try {
           const response = await fetch(
             `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=9740e24e1099431fa367fd5aa00d7a10`
           );
           const data = await response.json();
-
           const components = data.results[0].components;
-          const city =
-            components.city ||
-            components.town ||
-            components.village ||
-            components.state;
+          const city = components.city || components.town || components.village || components.state;
           const country = components.country;
           const stateName = components.state;
-          // const state = components.state_district;
-          setCity(city ? ` ${city}` : 'Location not found');
+
+          setCity(city ? `${city}` : 'Location not found');
           setLocation(`${stateName}, ${country}`);
         } catch (error) {
           setCity('Error fetching location');
-          console.error(error);
         }
       },
-      (error) => {
-        setLocation('Location access denied. Please enable it in your browser.');
-        console.error(error);
-      }
+      () => setCity('Location access denied')
     );
   }, []);
 
-
-
-
-
-
-
-
-
-
   return (
     <>
-      <div className="w-full flex items-center bg-[#131921] text-white font-roboto py-2 px-3 justify-between relative z-20">
-        {/* Left side: Logo hidden on mobile */} 
-        
-        <div className="hidden sm:flex items-center gap-3">
-          <div className="flex scale-[0.9] cursor-pointer" onClick={() => navigate("/")}>
-            <div
-              className="w-[116px] h-[48px] bg-no-repeat bg-[length:400px_auto] bg-[url('https://m.media-amazon.com/images/G/31/gno/sprites/nav-sprite-global-2x-reorg-privacy._CB546381437_.png')]"
-              style={{ backgroundPosition: "-9px -134px" }}
-              aria-label="Amazon"
-            />
-            <div className="text-lg font-semibold mt-2">.in</div>
-          </div>
-        </div>
+      {/* === NAVBAR === */}
+      <div className="bg-[#131921] text-white px-4 py-2 w-full z-50">
+        <div className="flex items-center justify-between">
+          {/* === LEFT: Logo + Location === */}
+          <div className="flex items-center gap-6">
+            {/* Logo */}
+            <div className=" hidden sm:flex items-center gap-1 text-sm text-gray-300 flex items-center gap-1 cursor-pointer" onClick={() => navigate("/")}>
+              <div
+                className="w-[120px] h-[50px]  mr-[3vh] bg-no-repeat bg-[length:400px_auto] bg-[url('https://m.media-amazon.com/images/G/31/gno/sprites/nav-sprite-global-2x-reorg-privacy._CB546381437_.png')]"
+                style={{ backgroundPosition: "-9px -134px" }}
+              />
+              {/* <span className="text-sm font-semibold ">.in</span> */}
+            </div>
+            {/* === MOBILE SEARCHBAR === */}
+            {/* === MOBILE RIGHT SIDE (Searchbar + Cart + Menu) === */}
+            <div className="flex sm:hidden items-center justify-between gap-2 w-full mt-2">
+              <div className="flex-grow">
+                <Searchbar setSearchTerm={setSearchTerm} />
+              </div>
+              {/* <Link to="/cart" className="relative ml-2">
+                <ShoppingCart size={26} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-orange-300 text-black rounded-full px-2 text-xs font-bold">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+              <button onClick={() => setMenuOpen(true)} className="ml-2">
+                <List size={26} />
+              </button> */}
+            </div>
 
-        {/* Middle: Searchbar */}
-        <div className="hide-on-small">
-          <div className="flex items-center gap-2 text-white text-sm hide-on-small"
-          >
 
-          <MapPin size={25} /> {city} 
-          </div>
-          <span className="text-sm text-gray-400 flex justify-center">{location}</span>
-        </div>
-        <div className="flex-grow max-w-[550px] mx-4 text-black">
-          <Searchbar setSearchTerm={setSearchTerm} />
-        </div>
-
-        {/* Right side on mobile: Cart and Hamburger */}
-        <div className="flex items-center gap-4 sm:hidden">
-          <Link to="/cart" className="relative">
-            <ShoppingCart size={28} />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-300 text-black rounded-full px-2 text-xs font-bold">
-                {totalItems}
-              </span>
+            {/* Location (desktop only) */}
+            {city && (
+              <div className="hidden sm:flex items-center gap-1 text-sm text-gray-300 mr-[3vh]">
+                <MapPin size={26} />
+                <span>{city}</span>
+              </div>
             )}
-          </Link>
-          <button
-            aria-label="Open Menu"
-            onClick={() => setMenuOpen(true)}
-            className="p-1"
-          >
-            <List size={32} />
-          </button>
-        </div>
+          </div>
 
-        {/* Right side on desktop: full nav */}
-        <ul className="hidden sm:flex gap-16 text-lg items-center">
-          <li className="flex items-center gap-1 text-sm cursor-pointer">
-            <img src="/indian_flag.png" alt="indian flag" className="h-4" />
-            <p>EN</p>
-            <img src="/dropdown.png" alt="dropdown" />
-          </li>
-          <li className="flex items-center gap-1 text-sm cursor-pointer">
-            <Bag size={32}  onClick={()=>{  navigate("/wishlist")}}/>
-            {/* <p>EN</p> */}
-            {/* <img src="/dropdown.png" alt="dropdown" /> */}
-          </li>
+          {/* === CENTER: Searchbar === */}
+          <div className="hidden sm:block w-[50%]">
+            <Searchbar setSearchTerm={setSearchTerm} />
+          </div>
 
-          <li className="text-sm cursor-pointer">
-            <p onClick={() => navigate(`/login`)}>Hello, {username}</p>
-            <div>
-              <p className="flex font-bold cursor-pointer" onClick={() => setShowModal(true)}>
-                Accounts & Lists
-                <span>
-                  {/* <img src="/dropdown.png" alt="dropdown" /> */}
-                </span>
-              </p>
+          {/* === RIGHT: Icons === */}
+          <div className="flex items-center gap-5 text-sm w-[40%] justify-evenly ">
+            <div className="hidden sm:flex items-center gap-2 cursor-pointer" onClick={() => navigate("/wishlist")}>
+              <Bag size={29} />
+              Wishlist
+            </div>
+
+            <div className="hidden sm:block cursor-pointer  flex justify-center ">
+              <p onClick={() => navigate(`/login`)}>Hello  , {username}</p>
+              <p className="font-bold" onClick={() => setShowModal(true)}>Accounts & Lists</p>
               {showModal && <UserModal onClose={() => setShowModal(false)} />}
             </div>
-          </li>
 
-          <li className="text-sm cursor-pointer">
-            <p>Returns</p>
-            <p className="font-bold">& Orders</p>
-          </li>
+            <div className="hidden sm:block cursor-pointer">
+              <p>Returns</p>
+              <p className="font-bold">& Orders</p>
+            </div>
+<div className="ml-[3vh]">
 
-          <li className="text-sm flex items-center relative cursor-pointer">
-            <Link to="/cart" className="flex items-center">
+            <Link to="/cart" className="relative">
               <ShoppingCart size={32} />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-orange-300 text-black rounded-full px-2 text-xs font-bold">
@@ -156,61 +122,52 @@ useEffect(() => {
                 </span>
               )}
             </Link>
-          </li>
-        </ul>
+</div>
+
+            {/* Hamburger for mobile */}
+            <button className="sm:hidden" onClick={() => setMenuOpen(true)}>
+              <List size={40} />
+            </button>
+          </div>
+        </div>
+
+        {/* === MOBILE SEARCHBAR ===
+        <div className="mt-3 block sm:hidden">
+          <Searchbar setSearchTerm={setSearchTerm} />
+        </div> */}
       </div>
 
-      {/* Mobile Sidebar Menu */}
+      {/* === MOBILE SIDEBAR === */}
       {menuOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-70 z-30"
-            onClick={() => setMenuOpen(false)}
-          />
-          {/* Sidebar */}
-          <div className="fixed top-0 right-0 w-64 h-full bg-[#131921] text-white z-40 flex flex-col p-6 space-y-6 shadow-lg">
-            <button
-              className="self-end text-white text-3xl font-bold"
-              aria-label="Close Menu"
-              onClick={() => setMenuOpen(false)}
-            >
+          <div className="fixed inset-0 bg-black bg-opacity-60 z-40" onClick={() => setMenuOpen(false)}></div>
+          <div className="fixed top-0 right-0 w-64 h-full bg-[#131921] text-white z-50 flex flex-col p-6 space-y-6 shadow-lg">
+            <button className="self-end text-white text-3xl font-bold" onClick={() => setMenuOpen(false)}>
               &times;
             </button>
             <nav className="flex flex-col gap-4">
-              {[
-                { text: "EN", icon: "/indian_flag.png" },
-                { text: `Hello, ${username}`, action: () => navigate("/login") },
-                { text: "Accounts & Lists", action: () => setShowModal(true) },
-                { text: "Returns & Orders", action: () => navigate("/orders") },
-                { text: "Your Wishlist", action: () => navigate("/wishlist") },
-                
-                { text: "Cart", action: () => navigate("/cart") },
-                { text: `Location : ${city}`},
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  className="cursor-pointer px-3 py-2 rounded hover:bg-orange-500"
-                  onClick={() => {
-                    if (item.action) item.action();
-                    setMenuOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    {item.icon && (
-                      <img src={item.icon} alt={item.text} className="h-4" />
-                    )}
-                    <span>{item.text}</span>
-                  </div>
-                </div>
-              ))}
+              <div className="px-3 py-2 hover:bg-orange-500 cursor-pointer" onClick={() => navigate("/login")}>
+                Hello, {username}
+              </div>
+              <div className="px-3 py-2 hover:bg-orange-500 cursor-pointer" onClick={() => setShowModal(true)}>
+                Accounts & Lists
+              </div>
+              <div className="px-3 py-2 hover:bg-orange-500 cursor-pointer" onClick={() => navigate("/orders")}>
+                Returns & Orders
+              </div>
+              <div className="px-3 py-2 hover:bg-orange-500 cursor-pointer" onClick={() => navigate("/wishlist")}>
+                Wishlist
+              </div>
+              <div className="px-3 py-2 hover:bg-orange-500 cursor-pointer" onClick={() => navigate("/cart")}>
+                Cart
+              </div>
+              <div className="px-3 py-2 text-sm text-gray-400">
+                {city ? `📍 ${city}` : "Fetching location..."}
+              </div>
             </nav>
           </div>
         </>
       )}
-
-      
-      {showModal && <UserModal onClose={() => setShowModal(false)} />}
     </>
   );
 };
