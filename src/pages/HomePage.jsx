@@ -159,25 +159,25 @@ useEffect(() => {
                   }}>
                     {addedToCart.includes(product.id) && (
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm text-gray-600">Qty:</span>
-                        <button
+                        {/* <span className="text-sm text-gray-600">Qty:</span> */}
+                        {/* <button
                           className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
                           onClick={() => dispatch(removeQuantityWatchlist(product.id))}
                         >
                           -
-                        </button>
-                        <p>
+                        </button> */}
+                        {/* <p>
                           {
                             // Find the cart item for this product to show its quantity
                             (cart?.watchlist?.find(item => item.product.id === product.id)?.quantity) || 1
                           }
-                        </p>
-                        <button
+                        </p> */}
+                        {/* <button
                           className="w-7 h-7 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded"
                           onClick={() => dispatch(addQuantityWatchlist(product.id))}
                         >
                           +
-                        </button>
+                        </button> */}
                       </div>
                     )}
                     {/* {toggle ? <Heart size={32} weight="fill" /> : <Heart size={32} />} */}

@@ -89,7 +89,7 @@ const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), [
     <div className="relative w-full max-w-xl mx-auto">
       <div className="flex items-center border rounded-md overflow-hidden">
         <input
-          className="flex-grow px-3 py-2 outline-none text-black"
+          className="flex-grow px-3 py-3 outline-none text-black"
           placeholder="Search Amazon.in"
           value={value}
           onChange={onInput}
@@ -100,7 +100,7 @@ const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), [
             <X size={18} />
           </button>
         )}
-        <button onClick={() => doSearch(value)} className="bg-orange-300 p-2">
+        <button onClick={() => doSearch(value)} className="bg-orange-300 py-3 px-3">
           <MagnifyingGlass size={24} />
         </button>
       </div>
